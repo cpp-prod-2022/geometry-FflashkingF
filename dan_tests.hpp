@@ -19,6 +19,11 @@ using testing::TestGroup;
 
 static double double_error = 1e-5;
 
+bool contains(const auto& container, const auto& item) {
+    return std::find(std::begin(container), std::end(container), item) != std::end(container);
+}
+
+
 // ===== Polygon =====
 struct PolygonData {
   std::initializer_list<Point> points;
@@ -588,11 +593,22 @@ make_test<PrettyTest>("ConstructionAndGetters", [](auto& test){
   Ellipse a{{-1.5, 0}, {1.5, 0}, 5};
   Ellipse b{{1, 1}, {4, 5}, 6};
 
-  test.equals(a.focuses(), (std::pair<Point, Point>{{-1.5, 0}, {1.5, 0}}));
-  test.equals(a.directrices(), (std::pair<Line, Line>{
-    {{-4.166666666666667, 0}, {-4.166666666666667, 1}},
-    {{4.166666666666667, 0}, {4.166666666666667, 1}}
-  }));
+  {
+    auto [first, second] = a.focuses();
+    Point correct[] = { {-1.5, 0}, {1.5, 0} };
+    test.check( contains(correct, first) );
+    test.check( contains(correct, second) );
+  }
+
+  {
+    auto [first, second] = a.directrices();
+    Line correct[] = {
+        {{-4.166666666666667, 0}, {-4.166666666666667, 1}},
+        {{4.166666666666667, 0}, {4.166666666666667, 1}}
+    };
+    test.check( contains(correct, first) );
+    test.check( contains(correct, second) );
+  }
   test.equals(a.center(), (Point{0, 0}));
   test.float_equals(a.eccentricity(), 0.6, double_error);
   test.float_equals(a.area(), 15.707963267948966, double_error);
@@ -601,11 +617,23 @@ make_test<PrettyTest>("ConstructionAndGetters", [](auto& test){
       const double perimeter_error = real_perimeter * 0.05 + double_error;
       test.float_equals(a.perimeter(), real_perimeter, perimeter_error);
   }
-  test.equals(b.focuses(), (std::pair<Point, Point>{{1, 1}, {4, 5}}));
-  test.equals(b.directrices(), (std::pair{
-    Line{-0.75, 0.375},
-    Line{-0.75, 9.375},
-  }));
+
+  {
+    auto [first, second] = b.focuses();
+    Point correct[] = { {1, 1}, {4, 5} };
+    test.check( contains(correct, first) );
+    test.check( contains(correct, second) );
+  }
+
+  {
+    auto [first, second] = b.directrices();
+    Line correct[] = {
+        {-0.75, 0.375},
+        {-0.75, 9.375},
+    };
+    test.check( contains(correct, first) );
+    test.check( contains(correct, second) );
+  }
   test.equals(b.center(), (Point{2.5, 3}));
   test.float_equals(b.eccentricity(), 5. / 6, double_error);
   test.float_equals(b.area(), 15.629226114141467, double_error);
