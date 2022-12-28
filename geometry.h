@@ -29,7 +29,7 @@ struct Point {
   double x, y;
   Point() {}
   Point(double x, double y) : x(x), y(y) {}
-  Point(const Vector&);
+  explicit Point(const Vector&);
 };
 
 std::ostream& operator<<(std::ostream& out, const Point& pt) {
@@ -99,9 +99,9 @@ struct Vector {
 
 Point::Point(const Vector& v) : x(v.x), y(v.y) {}
 
-Vector operator+(const Vector& v1, const Vector& v2) {
+/*Vector operator+(const Vector& v1, const Vector& v2) {
   return Vector(v1.x + v2.x, v1.y + v2.y);
-}
+}*/
 
 Vector operator-(const Vector& v1, const Vector& v2) {
   return Vector(v1.x - v2.x, v1.y - v2.y);
@@ -271,12 +271,12 @@ class Ellipse : public Shape {
 
     double k = a / get_c();
     v *= k * k;
-    return {Line(center + v, norm), Line(center - v, norm)};
+    return {Line(center + v, center + v + norm), Line(center - v, center - v + norm)};
   }
 
   double perimeter() const override {  //////////
-    return 1;                          ////////////////////////////
-    // return 4 * a * std::comp_ellint_2(eccentricity());
+   // return 1;                          ////////////////////////////
+    return 4 * a * std::comp_ellint_2(eccentricity());
   }  ///////////////
 
   double area() const override { return PI * a * get_b(); }
@@ -692,7 +692,7 @@ class Triangle : public Polygon {
     Point c1((vert[0].x + vert[1].x) / 2, (vert[0].y + vert[1].y) / 2);
     Vector v1(vert[0], vert[1]);
     v1.rotate90();
-    Line sp1(c1, v1);
+    Line sp1(c1, c1 + v1);
     // std::cerr << "c1: " << c1;
     // std::cerr << "v1: " << v1;
     // std::cerr << "Line sp1: " << sp1;
@@ -700,7 +700,7 @@ class Triangle : public Polygon {
     Point c2((vert[1].x + vert[2].x) / 2, (vert[1].y + vert[2].y) / 2);
     Vector v2(vert[1], vert[2]);
     v2.rotate90();
-    Line sp2(c2, v2);
+    Line sp2(c2, c2 + v2);
     // std::cerr << "Line sp2: " << sp2;
 
     Point center = sp1.intersection(sp2);
@@ -719,7 +719,7 @@ class Triangle : public Polygon {
     // std::cerr << "first" << std::endl;
     // std::cerr << vert[0];
     // std::cerr << v1 + v2;
-    Line l1(vert[0], v1 + v2);
+    Line l1(vert[0], vert[0] + v1 + v2);
     // std::cerr << "line1: " << l1;
 
     v1 = Vector(vert[1], vert[2]);
@@ -729,7 +729,7 @@ class Triangle : public Polygon {
     // std::cerr << "second" << std::endl;
     // std::cerr << vert[1];
     // std::cerr << v1 + v2;
-    Line l2(vert[1], v1 + v2);
+    Line l2(vert[1], vert[1] + v1 + v2);
 
     Point center(l1.intersection(l2));
     // std::cerr << "area: " << area() << std::endl;
@@ -749,12 +749,12 @@ class Triangle : public Polygon {
     Vector v1(pt1, pt2);
     Point c1((pt1.x + pt2.x) / 2, (pt1.y + pt2.y) / 2);
     v1.rotate90();
-    Line l1(c1, v1);
+    Line l1(c1, c1 + v1);
 
     Vector v2(pt1, pt3);
     Point c2((pt1.x + pt3.x) / 2, (pt1.y + pt3.y) / 2);
     v2.rotate90();
-    Line l2(c2, v2);
+    Line l2(c2, c2 + v2);
 
     Point center(l1.intersection(l2));
     return Circle(center, dist(center, pt1));
