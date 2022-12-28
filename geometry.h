@@ -28,7 +28,7 @@ struct Vector;
 struct Point {
   double x, y;
   Point() {}
-  explicit Point(double x, double y) : x(x), y(y) {}
+  Point(double x, double y) : x(x), y(y) {}
   Point(const Vector&);
 };
 
@@ -92,10 +92,10 @@ struct Vector {
 };
 }  // namespace
 
-std::ostream& operator<<(std::ostream& out, const Vector& v) {
+/*std::ostream& operator<<(std::ostream& out, const Vector& v) {
   out << v.x << ' ' << v.y << std::endl;
   return out;
-}
+}*/
 
 Point::Point(const Vector& v) : x(v.x), y(v.y) {}
 
@@ -386,6 +386,11 @@ class Polygon : public Shape {
   template <typename... Why>  //??????
   Polygon(Why... args) {      // Point... why not this?
     (vert.emplace_back(args), ...);
+  }
+  Polygon(const std::initializer_list<Point>& list) {
+    for(const Point& i : list) {
+      vert.push_back(i);
+    }
   }
 
   size_t verticesCount() const { return vert.size(); }
