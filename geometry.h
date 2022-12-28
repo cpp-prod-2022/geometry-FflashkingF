@@ -277,8 +277,8 @@ class Ellipse : public Shape {
   double perimeter() const override {  //////////
    // return 1;       
     double b = get_b();        
-    return PI * (3 * (a + b) - sqrt((3 * a + b) * (a + 3 * b)));           ////////////////////////////
-    //return 4 * a * std::comp_ellint_2(eccentricity());
+    //return PI * (3 * (a + b) - sqrt((3 * a + b) * (a + 3 * b)));           ////////////////////////////
+    return 4 * a * std::comp_ellint_2(eccentricity());
   }  ///////////////
 
   double area() const override { return PI * a * get_b(); }
