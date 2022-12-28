@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <utility>
 
 const double EPS1 = 1e-8;
 const double PI = acos(-1);
@@ -19,12 +21,14 @@ bool sign(double a) {
 
 double to_radian(double angle) { return angle * PI / 180; }
 
+namespace {
 struct Vector;
+}
 
 struct Point {
   double x, y;
   Point() {}
-  Point(double x, double y) : x(x), y(y) {}
+  explicit Point(double x, double y) : x(x), y(y) {}
   Point(const Vector&);
 };
 
@@ -47,14 +51,15 @@ bool operator==(const Point& pt1, const Point& pt2) {
 
 bool operator!=(const Point& a, const Point& b) { return !(a == b); }
 
+namespace {
 struct Vector {
   double x, y;
 
   Vector() {}
-  Vector(double x, double y) : x(x), y(y) {}
-  Vector(const Point& start, const Point& end)
+  explicit Vector(double x, double y) : x(x), y(y) {}
+  explicit Vector(const Point& start, const Point& end)
       : x(end.x - start.x), y(end.y - start.y) {}
-  Vector(const Point& pt) : x(pt.x), y(pt.y) {}
+  explicit Vector(const Point& pt) : x(pt.x), y(pt.y) {}
 
   void rotate(double angle) {
     double cosa = cos(angle);
@@ -85,6 +90,7 @@ struct Vector {
     y /= len;
   }
 };
+}  // namespace
 
 std::ostream& operator<<(std::ostream& out, const Vector& v) {
   out << v.x << ' ' << v.y << std::endl;
@@ -140,7 +146,7 @@ class Line {
   Line(const Point& pt, double k) : a(k), b(-1), c(pt.y - k * pt.x) {
     // std::cerr << "NOWAY2" << std::endl;
   }
-  Line(const Point& pt, const Vector& v) : Line(pt, pt + v) {
+  explicit Line(const Point& pt, const Vector& v) : Line(pt, pt + v) {
     // std::cerr << "LINE CONSTR pt v" << std::endl;
     // std::cerr << pt;
     // std::cerr << v;
@@ -242,7 +248,7 @@ class Ellipse : public Shape {
   Ellipse(const Point& f1, const Point& f2, double _2a)
       : f1(f1), f2(f2), a(_2a / 2) {}
 
-  std::pair<Point, Point> focuses() const { return {f1, f2}; }
+  std::pair<Point, Point> focuses() const { return std::make_pair(f1, f2); }
 
   double get_c() const { return hypot(f2.x - f1.x, f2.y - f1.y) / 2; }
 
@@ -269,8 +275,8 @@ class Ellipse : public Shape {
   }
 
   double perimeter() const override {  //////////
-    // return  1;////////////////////////////
-    return 4 * a * std::comp_ellint_2(eccentricity());
+    return 1;                          ////////////////////////////
+    // return 4 * a * std::comp_ellint_2(eccentricity());
   }  ///////////////
 
   double area() const override { return PI * a * get_b(); }
@@ -322,8 +328,8 @@ class Ellipse : public Shape {
     Vector v1(center, f1), v2(center, f2);
     v1.rotate(angle);
     v2.rotate(angle);
-    f1 = Point(center + v1);
-    f2 = Point(center + v2);
+    f1 = center + v1;
+    f2 = center + v2;
   }
 
   void reflect(const Point& center) final {
@@ -417,18 +423,18 @@ class Polygon : public Shape {
   }
 
   bool help_to_equal(const Polygon& p) const {
-    int start = -1;
+    size_t start = static_cast<size_t>(-1);
     for (size_t i = 0; i < vert.size(); ++i) {
       if (vert[i] == p.vert[0]) {
         start = i;
         break;
       }
     }
-    if (start != -1) {
+    if (start != static_cast<size_t>(-1)) {
       std::vector<Point> temp(vert.size());
-      copy(vert.begin() + start, vert.end(), temp.begin());
-      copy(vert.begin(), vert.begin() + start,
-           temp.begin() + vert.size() - start);
+      copy(vert.begin() + static_cast<int>(start), vert.end(), temp.begin());
+      copy(vert.begin(), vert.begin() + static_cast<int>(start),
+           temp.begin() + static_cast<int>(vert.size() - start));
       vert = temp;
       for (size_t i = 1; i < vert.size(); ++i) {
         if (vert[i] != p.vert[i]) {
@@ -444,7 +450,7 @@ class Polygon : public Shape {
     if (vert.size() != p.vert.size()) return 0;
     bool eq = help_to_equal(p);
     if (eq) return 1;
-    reverse(vert.begin(), vert.end());
+    std::reverse(vert.begin(), vert.end());
     eq = help_to_equal(p);
     return eq;
   }
@@ -488,7 +494,7 @@ class Polygon : public Shape {
     if (vert.size() != p.vert.size()) return 0;
     bool cong = help_to_congruent(p);
     if (cong) return 1;
-    reverse(vert.begin(), vert.end());
+    std::reverse(vert.begin(), vert.end());
     cong = help_to_congruent(p);
     return cong;
   }
@@ -545,7 +551,7 @@ class Polygon : public Shape {
     // std::cerr << "sz == p.sz" << std::endl;
     bool sim = help_to_similar(p);
     if (sim) return 1;
-    reverse(vert.begin(), vert.end());
+    std::reverse(vert.begin(), vert.end());
     sim = help_to_similar(p);
     // if(sim)//std::cerr << "YES2" << std::endl;
     // else//std::cerr << "NO2" << std::endl;
