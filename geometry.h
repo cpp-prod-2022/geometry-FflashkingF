@@ -146,11 +146,11 @@ class Line {
   Line(const Point& pt, double k) : a(k), b(-1), c(pt.y - k * pt.x) {
     // std::cerr << "NOWAY2" << std::endl;
   }
-  explicit Line(const Point& pt, const Vector& v) : Line(pt, pt + v) {
+  //explicit Line(const Point& pt, const Vector& v) : Line(pt, pt + v) {
     // std::cerr << "LINE CONSTR pt v" << std::endl;
     // std::cerr << pt;
     // std::cerr << v;
-  }
+  //}
 
   bool operator==(const Line& l) const {
     // if(!equal(a * l.b, b * l.a)) return 0;
