@@ -398,7 +398,7 @@ class Polygon : public Shape {
   const std::vector<Point>& getVertices() const { return vert; }
 
   bool isConvex() const {
-    bool start_sign = sign(Vector(vert.back()) % Vector(vert[0], vert[1]));
+    bool start_sign = sign(Vector(vert.back(), vert[0]) % Vector(vert[0], vert[1]));
     for (size_t i = 1; i < vert.size(); ++i) {
       if (sign(Vector(vert[i - 1], vert[i]) % Vector(vert[i], vert[next(i)])) !=
           start_sign) {
