@@ -11,6 +11,11 @@ bool equal(double a, double b) { return std::fabs(a - b) < EPS1; }
 
 bool smaller_or_equal(double a, double b) { return a <= b || equal(a, b); }
 
+namespace NUMBERS {
+  const uint8_t three = 3;
+  const uint8_t pi_in_gradus = 180;
+};
+
 bool sign(double a) {
   if (equal(a, 0) || a >= 0) {
     return 1;
@@ -19,14 +24,14 @@ bool sign(double a) {
   }
 }
 
-double to_radian(double angle) { return angle * PI / 180; }
+double to_radian(double angle) { return angle * PI / NUMBERS::pi_in_gradus; }
 
 namespace {
 struct Vector;
 }
 
 struct Point {
-  double x, y;
+  double x = 0, y = 0;
   Point() {}
   Point(double x, double y) : x(x), y(y) {}
   explicit Point(const Vector&);
@@ -53,7 +58,7 @@ bool operator!=(const Point& a, const Point& b) { return !(a == b); }
 
 namespace {
 struct Vector {
-  double x, y;
+  double x = 0, y = 0;
 
   Vector() {}
   explicit Vector(double x, double y) : x(x), y(y) {}
@@ -276,7 +281,7 @@ class Ellipse : public Shape {
 
   double perimeter() const override {  //////////
    // return 1;       
-    double b = get_b();        
+    //double b = get_b();        
     //return PI * (3 * (a + b) - sqrt((3 * a + b) * (a + 3 * b)));           ////////////////////////////
     return 4 * a * std::comp_ellint_2(eccentricity());
   }  ///////////////
@@ -655,7 +660,7 @@ class Rectangle : public Polygon {
   }
 
   std::pair<Line, Line> diagonals() const {
-    return {Line(vert[0], vert[2]), Line(vert[1], vert[3])};
+    return {Line(vert[0], vert[2]), Line(vert[1], vert[NUMBERS::three])};
   }
 };
 
@@ -677,8 +682,8 @@ class Triangle : public Polygon {
   Triangle(const Point& a, const Point& b, const Point& c) : Polygon(a, b, c) {}
 
   Point centroid() const {
-    return Point((vert[0].x + vert[1].x + vert[2].x) / 3,
-                 (vert[0].y + vert[1].y + vert[2].y) / 3);
+    return Point((vert[0].x + vert[1].x + vert[2].x) / NUMBERS::three,
+                 (vert[0].y + vert[1].y + vert[2].y) / NUMBERS::three);
   }
 
   Point orthocenter() const {
