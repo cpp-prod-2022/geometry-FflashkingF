@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <vector>
 #include <utility>
+#include <vector>
 
 const double EPS1 = 1e-8;
 const double PI = acos(-1);
@@ -11,11 +11,10 @@ bool equal(double a, double b) { return std::fabs(a - b) < EPS1; }
 
 bool smaller_or_equal(double a, double b) { return a <= b || equal(a, b); }
 
-namespace NUMBERS {
-  const uint8_t three = 3;
-  const uint8_t four = 4;
-  const uint8_t pi_in_gradus = 180;
-};
+namespace {
+const uint8_t three = 3;
+const uint8_t pi_in_gradus = 180;
+};  // namespace
 
 bool sign(double a) {
   if (equal(a, 0) || a >= 0) {
@@ -24,8 +23,8 @@ bool sign(double a) {
     return 0;
   }
 }
-//
-double to_radian(double angle) { return angle * PI / NUMBERS::pi_in_gradus; }
+
+double to_radian(double angle) { return angle * PI / pi_in_gradus; }
 
 namespace {
 struct Vector;
@@ -98,16 +97,7 @@ struct Vector {
 };
 }  // namespace
 
-/*std::ostream& operator<<(std::ostream& out, const Vector& v) {
-  out << v.x << ' ' << v.y << std::endl;
-  return out;
-}*/
-
 Point::Point(const Vector& v) : x(v.x), y(v.y) {}
-
-/*Vector operator+(const Vector& v1, const Vector& v2) {
-  return Vector(v1.x + v2.x, v1.y + v2.y);
-}*/
 
 Vector operator-(const Vector& v1, const Vector& v2) {
   return Vector(v1.x - v2.x, v1.y - v2.y);
@@ -141,25 +131,11 @@ class Line {
   Line(const Point& pt0, const Point& pt1)
       : a(pt1.y - pt0.y),
         b(pt0.x - pt1.x),
-        c(pt0.y * (pt1.x - pt0.x) + pt0.x * (pt0.y - pt1.y)) {
-    // std::cerr << "HOW?" << std::endl;
-    // std::cerr << pt0;
-    // std::cerr << pt1;
-  }
-  Line(double k, double b) : a(k), b(-1), c(b) {
-    // std::cerr << "NOWAY1" << std::endl;
-  }
-  Line(const Point& pt, double k) : a(k), b(-1), c(pt.y - k * pt.x) {
-    // std::cerr << "NOWAY2" << std::endl;
-  }
-  //explicit Line(const Point& pt, const Vector& v) : Line(pt, pt + v) {
-    // std::cerr << "LINE CONSTR pt v" << std::endl;
-    // std::cerr << pt;
-    // std::cerr << v;
-  //}
+        c(pt0.y * (pt1.x - pt0.x) + pt0.x * (pt0.y - pt1.y)) {}
+  Line(double k, double b) : a(k), b(-1), c(b) {}
+  Line(const Point& pt, double k) : a(k), b(-1), c(pt.y - k * pt.x) {}
 
   bool operator==(const Line& l) const {
-    // if(!equal(a * l.b, b * l.a)) return 0;
     if (!equal(a, 0) || fabs(a) > fabs(b)) {
       double k = l.a / a;
       if (equal(l.b, b * k) && equal(l.c, c * k)) {
@@ -206,9 +182,6 @@ class Line {
   }
 
   Point intersection(const Line& l2) const {
-    // std::cerr << "intersection" << std::endl;
-    // std::cerr << *this;
-    // std::cerr << l2;
     double d = a * l2.b - l2.a * b;
     return Point((b * l2.c - l2.b * c) / d, (c * l2.a - a * l2.c) / d);
   }
@@ -277,15 +250,15 @@ class Ellipse : public Shape {
 
     double k = a / get_c();
     v *= k * k;
-    return {Line(center + v, center + v + norm), Line(center - v, center - v + norm)};
+    return {Line(center + v, center + v + norm),
+            Line(center - v, center - v + norm)};
   }
 
-  double perimeter() const override {  //////////
-   // return 1;       
-    double b = get_b();        
-    return PI * (NUMBERS::three * (a + b) - sqrt((NUMBERS::three * a + b) * (a + NUMBERS::three * b)));           ////////////////////////////
-   // return 4 * a * std::comp_ellint_2(eccentricity());
-  }  ///////////////
+  double perimeter() const override {
+    double b = get_b();
+    return PI * (three * (a + b) - sqrt((three * a + b) * (a + three * b)));
+    // return 4 * a * std::comp_ellint_2(eccentricity());
+  }
 
   double area() const override { return PI * a * get_b(); }
 
@@ -396,7 +369,7 @@ class Polygon : public Shape {
     (vert.emplace_back(args), ...);
   }
   Polygon(const std::initializer_list<Point>& list) {
-    for(const Point& i : list) {
+    for (const Point& i : list) {
       vert.push_back(i);
     }
   }
@@ -406,7 +379,8 @@ class Polygon : public Shape {
   const std::vector<Point>& getVertices() const { return vert; }
 
   bool isConvex() const {
-    bool start_sign = sign(Vector(vert.back(), vert[0]) % Vector(vert[0], vert[1]));
+    bool start_sign =
+        sign(Vector(vert.back(), vert[0]) % Vector(vert[0], vert[1]));
     for (size_t i = 1; i < vert.size(); ++i) {
       if (sign(Vector(vert[i - 1], vert[i]) % Vector(vert[i], vert[next(i)])) !=
           start_sign) {
@@ -489,8 +463,6 @@ class Polygon : public Shape {
       for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
         Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
         Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
-        // double a1 = std::fabs(angle_between(v1, v2));
-        // double a2 = std::fabs(angle_between(v3, v4));
         if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
             !equal(std::fabs(angle_between(v1, v2)),
                    std::fabs(angle_between(v3, v4)))) {
@@ -526,29 +498,19 @@ class Polygon : public Shape {
       bool ok = 1;
       double k = -1;
       for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
-        // std::cerr << "i: " << i << std::endl;
-        // std::cerr << "j: " << j << std::endl;
         Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
         Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
         if (j == 0) {
           k = v1.len() / v3.len();
-          // std::cerr << "k: " << k << std::endl;
         }
         v3 *= k;
         v4 *= k;
         double a1 = std::fabs(angle_between(v1, v2));
         double a2 = std::fabs(angle_between(v3, v4));
 
-        // std::cerr << "vec1: " << v1.len() << std::endl;
-        // std::cerr << "vec2: " << v2.len() << std::endl;
-        // std::cerr << "vec3: " << v3.len() << std::endl;
-        // std::cerr << "vec4: " << v4.len() << std::endl;
-        // std::cerr << "a1: " << a1 << std::endl;
-        // std::cerr << "a2: " << a2 << std::endl;
         if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
             !equal(a1, a2)) {
           ok = 0;
-          // std::cerr << "shish" << std::endl;
           break;
         }
       }
@@ -558,23 +520,17 @@ class Polygon : public Shape {
   }
 
   bool isSimilarTo(const Polygon& p) const {
-    // std::cerr << "isSim" << std::endl;
-    // std::cerr << "OFSIJFOSDJIF" << std::endl;
     if (vert.size() != p.vert.size()) return 0;
-    // std::cerr << "sz == p.sz" << std::endl;
     bool sim = help_to_similar(p);
     if (sim) return 1;
     std::reverse(vert.begin(), vert.end());
     sim = help_to_similar(p);
-    // if(sim)//std::cerr << "YES2" << std::endl;
-    // else//std::cerr << "NO2" << std::endl;
     return sim;
   }
 
   bool isSimilarTo(const Shape& sh) const final {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
     if (pointer) {
-      // std::cerr << "BEN" << std::endl;
       return isSimilarTo(*pointer);
     } else {
       return 0;
@@ -661,7 +617,7 @@ class Rectangle : public Polygon {
   }
 
   std::pair<Line, Line> diagonals() const {
-    return {Line(vert[0], vert[2]), Line(vert[1], vert[NUMBERS::three])};
+    return {Line(vert[0], vert[2]), Line(vert[1], vert[three])};
   }
 };
 
@@ -683,8 +639,8 @@ class Triangle : public Polygon {
   Triangle(const Point& a, const Point& b, const Point& c) : Polygon(a, b, c) {}
 
   Point centroid() const {
-    return Point((vert[0].x + vert[1].x + vert[2].x) / NUMBERS::three,
-                 (vert[0].y + vert[1].y + vert[2].y) / NUMBERS::three);
+    return Point((vert[0].x + vert[1].x + vert[2].x) / three,
+                 (vert[0].y + vert[1].y + vert[2].y) / three);
   }
 
   Point orthocenter() const {
@@ -696,60 +652,39 @@ class Triangle : public Polygon {
   }
 
   Circle circumscribedCircle() const {
-    // std::cerr << "cricum" << std::endl;
     Point c1((vert[0].x + vert[1].x) / 2, (vert[0].y + vert[1].y) / 2);
     Vector v1(vert[0], vert[1]);
     v1.rotate90();
     Line sp1(c1, c1 + v1);
-    // std::cerr << "c1: " << c1;
-    // std::cerr << "v1: " << v1;
-    // std::cerr << "Line sp1: " << sp1;
 
     Point c2((vert[1].x + vert[2].x) / 2, (vert[1].y + vert[2].y) / 2);
     Vector v2(vert[1], vert[2]);
     v2.rotate90();
     Line sp2(c2, c2 + v2);
-    // std::cerr << "Line sp2: " << sp2;
 
     Point center = sp1.intersection(sp2);
-    // std::cerr << "ceter: " << center;
-    // std::cerr << "vert[0]: " << vert[0];
-    // std::cerr << "radius: " << dist(center, vert[0]) << std::endl;
     return Circle(center, dist(center, vert[0]));
   }
 
   Circle inscribedCircle() const {
-    // std::cerr << "inscribedCircle" << std::endl;
     Vector v1(vert[0], vert[1]);
     Vector v2(vert[0], vert[2]);
     v1.normalize();
     v2.normalize();
-    // std::cerr << "first" << std::endl;
-    // std::cerr << vert[0];
-    // std::cerr << v1 + v2;
     Line l1(vert[0], vert[0] + v1 + v2);
-    // std::cerr << "line1: " << l1;
 
     v1 = Vector(vert[1], vert[2]);
     v2 = Vector(vert[1], vert[0]);
     v1.normalize();
     v2.normalize();
-    // std::cerr << "second" << std::endl;
-    // std::cerr << vert[1];
-    // std::cerr << v1 + v2;
     Line l2(vert[1], vert[1] + v1 + v2);
-
     Point center(l1.intersection(l2));
-    // std::cerr << "area: " << area() << std::endl;
-    // std::cerr << "perimeter: " << perimeter() << std::endl;
-    // std::cerr << std::endl;
     return Circle(center, area() * 2 / perimeter());
   }
 
   Line EulerLine() const { return Line(centroid(), orthocenter()); }
 
   Circle ninePointsCircle() const {
-    // std::cerr << std::endl << std::endl <<  "ninePointsCirce" << std::endl;
     Point pt1((vert[0].x + vert[1].x) / 2, (vert[0].y + vert[1].y) / 2);
     Point pt2((vert[0].x + vert[2].x) / 2, (vert[0].y + vert[2].y) / 2);
     Point pt3((vert[2].x + vert[1].x) / 2, (vert[2].y + vert[1].y) / 2);
@@ -767,8 +702,6 @@ class Triangle : public Polygon {
     Point center(l1.intersection(l2));
     return Circle(center, dist(center, pt1));
   }
-
-  // friend std::ostream& operator<<(std::ostream&, const Circle&);
 };
 
 std::ostream& operator<<(std::ostream& out, const Circle& c) {
