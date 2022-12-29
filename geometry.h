@@ -23,7 +23,7 @@ bool sign(double a) {
     return 0;
   }
 }
-
+//
 double to_radian(double angle) { return angle * PI / NUMBERS::pi_in_gradus; }
 
 namespace {
