@@ -13,6 +13,7 @@ bool smaller_or_equal(double a, double b) { return a <= b || equal(a, b); }
 
 namespace NUMBERS {
   const uint8_t three = 3;
+  const uint8_t four = 4;
   const uint8_t pi_in_gradus = 180;
 };
 
@@ -281,9 +282,9 @@ class Ellipse : public Shape {
 
   double perimeter() const override {  //////////
    // return 1;       
-    //double b = get_b();        
-    //return PI * (3 * (a + b) - sqrt((3 * a + b) * (a + 3 * b)));           ////////////////////////////
-    return 4 * a * std::comp_ellint_2(eccentricity());
+    double b = get_b();        
+    return PI * (NUMBERS::three * (a + b) - sqrt((NUMBERS::three * a + b) * (a + NUMBERS::three * b)));           ////////////////////////////
+   // return 4 * a * std::comp_ellint_2(eccentricity());
   }  ///////////////
 
   double area() const override { return PI * a * get_b(); }
