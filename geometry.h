@@ -417,46 +417,14 @@ class Polygon : public Shape {
 
   size_t next(size_t i) const { return i == vert.size() - 1 ? 0 : i + 1; }
 
-  bool help_to_congruent(const Polygon& p) const {
+  bool help_to_similar_and_congruent(const Polygon& p, const bool is_help_to_congruent) const {
     for (size_t start = 0; start < vert.size(); ++start) {
       bool ok = 1;
+      double k = (is_help_to_congruent ? 1 : -1);
       for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
         Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
         Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
-        if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
-            !equal(std::fabs(angle_between(v1, v2)),
-                   std::fabs(angle_between(v3, v4)))) {
-          ok = 0;
-          break;
-        }
-      }
-      if (ok) return true;
-    }
-    return false;
-  }
-
-  bool isCongruentTo(const Polygon& p) const {
-    if (vert.size() != p.vert.size()) return false;
-    bool cong = help_to_congruent(p);
-    if (cong) return true;
-    std::reverse(vert.begin(), vert.end());
-    cong = help_to_congruent(p);
-    return cong;
-  }
-
-  bool isCongruentTo(const Shape& sh) const final {
-    const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
-    return pointer && isCongruentTo(*pointer);
-  }
-
-  bool help_to_similar(const Polygon& p) const {
-    for (size_t start = 0; start < vert.size(); ++start) {
-      bool ok = 1;
-      double k = -1;
-      for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
-        Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
-        Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
-        if (j == 0) {
+        if (k == -1) {
           k = v1.len() / v3.len();
         }
         v3 *= k;
@@ -474,12 +442,26 @@ class Polygon : public Shape {
     return false;
   }
 
+  bool isCongruentTo(const Polygon& p) const {
+    if (vert.size() != p.vert.size()) return false;
+    bool cong = help_to_similar_and_congruent(p, true);
+    if (cong) return true;
+    std::reverse(vert.begin(), vert.end());
+    cong = help_to_similar_and_congruent(p, true);
+    return cong;
+  }
+
+  bool isCongruentTo(const Shape& sh) const final {
+    const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
+    return pointer && isCongruentTo(*pointer);
+  }
+
   bool isSimilarTo(const Polygon& p) const {
     if (vert.size() != p.vert.size()) return false;
-    bool sim = help_to_similar(p);
+    bool sim = help_to_similar_and_congruent(p, false);
     if (sim) return true;
     std::reverse(vert.begin(), vert.end());
-    sim = help_to_similar(p);
+    sim = help_to_similar_and_congruent(p, false);
     return sim;
   }
 
