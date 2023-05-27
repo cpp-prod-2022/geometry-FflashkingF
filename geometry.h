@@ -252,26 +252,17 @@ class Ellipse : public Shape {
 
   bool is_equal(const Shape& sh) const final {
     const Ellipse* pointer = dynamic_cast<const Ellipse*>(&sh);
-    if (pointer) {
-      return *this == *pointer;
-    }
-    return false;
+    return pointer && *this == *pointer;
   }
 
   bool isCongruentTo(const Shape& sh) const final {
     const Ellipse* e = dynamic_cast<const Ellipse*>(&sh);
-    if (e) {
-      return a == e->a && equal(get_c(), e->get_c());
-    }
-    return false;
+    return e && a == e->a && equal(get_c(), e->get_c());
   }
 
   bool isSimilarTo(const Shape& sh) const final {
     const Ellipse* e = dynamic_cast<const Ellipse*>(&sh);
-    if (e) {
-      return equal(a * e->get_c(), get_c() * e->a);
-    }
-    return false;
+    return e && equal(a * e->get_c(), get_c() * e->a);
   }
 
   bool containsPoint(const Point& pt) const final {
@@ -418,10 +409,7 @@ class Polygon : public Shape {
 
   bool is_equal(const Shape& sh) const final {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
-    if (pointer) {
-      return *this == *pointer;
-    }
-    return false;
+    return pointer && *this == *pointer;
   }
 
   size_t before(size_t i) const { return i == 0 ? vert.size() - 1 : i - 1; }
@@ -457,10 +445,7 @@ class Polygon : public Shape {
 
   bool isCongruentTo(const Shape& sh) const final {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
-    if (pointer) {
-      return isCongruentTo(*pointer);
-    }
-    return false;
+    return pointer && isCongruentTo(*pointer);
   }
 
   bool help_to_similar(const Polygon& p) const {
@@ -499,10 +484,7 @@ class Polygon : public Shape {
 
   bool isSimilarTo(const Shape& sh) const final {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
-    if (pointer) {
-      return isSimilarTo(*pointer);
-    }
-    return false;
+    return pointer && isSimilarTo(*pointer);
   }
 
   bool containsPoint(const Point& pt) const final {
