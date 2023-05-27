@@ -17,11 +17,7 @@ const uint8_t pi_in_gradus = 180;
 };  // namespace
 
 bool sign(double a) {
-  if (equal(a, 0) || a >= 0) {
-    return 1;
-  } else {
-    return 0;
-  }
+  return equal(a, 0) || a >= 0;
 }
 
 double to_radian(double angle) { return angle * PI / pi_in_gradus; }
@@ -138,18 +134,10 @@ class Line {
   bool operator==(const Line& l) const {
     if (!equal(a, 0) || fabs(a) > fabs(b)) {
       double k = l.a / a;
-      if (equal(l.b, b * k) && equal(l.c, c * k)) {
-        return 1;
-      } else {
-        return 0;
-      }
+      return equal(l.b, b * k) && equal(l.c, c * k);
     } else {
       double k = l.b / b;
-      if (equal(l.a, a * k) && equal(l.c, c * k)) {
-        return 1;
-      } else {
-        return 0;
-      }
+      return equal(l.a, a * k) && equal(l.c, c * k);
     }
   }
 
@@ -274,7 +262,7 @@ class Ellipse : public Shape {
     if (pointer) {
       return *this == *pointer;
     } else {
-      return 0;
+      return false;
     }
   }
 
@@ -283,7 +271,7 @@ class Ellipse : public Shape {
     if (e) {
       return a == e->a && equal(get_c(), e->get_c());
     } else {
-      return 0;
+      return false;
     }
   }
 
@@ -292,16 +280,12 @@ class Ellipse : public Shape {
     if (e) {
       return equal(a * e->get_c(), get_c() * e->a);
     } else {
-      return 0;
+      return false;
     }
   }
 
   bool containsPoint(const Point& pt) const final {
-    if (smaller_or_equal(dist(f1, pt) + dist(f2, pt), 2 * a)) {
-      return 1;
-    } else {
-      return 0;
-    }
+    return smaller_or_equal(dist(f1, pt) + dist(f2, pt), 2 * a);
   }
 
   void rotate(const Point& center, double angle) final {
@@ -384,10 +368,10 @@ class Polygon : public Shape {
     for (size_t i = 1; i < vert.size(); ++i) {
       if (sign(Vector(vert[i - 1], vert[i]) % Vector(vert[i], vert[next(i)])) !=
           start_sign) {
-        return 0;
+        return false;
       }
     }
-    return 1;
+    return true;
   }
 
   double perimeter() const final {
@@ -425,18 +409,18 @@ class Polygon : public Shape {
       vert = temp;
       for (size_t i = 1; i < vert.size(); ++i) {
         if (vert[i] != p.vert[i]) {
-          return 0;
+          return false;
         }
       }
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
   bool operator==(const Polygon& p) const {
-    if (vert.size() != p.vert.size()) return 0;
+    if (vert.size() != p.vert.size()) return false;
     bool eq = help_to_equal(p);
-    if (eq) return 1;
+    if (eq) return true;
     std::reverse(vert.begin(), vert.end());
     eq = help_to_equal(p);
     return eq;
@@ -449,7 +433,7 @@ class Polygon : public Shape {
     if (pointer) {
       return *this == *pointer;
     } else {
-      return 0;
+      return false;
     }
   }
 
@@ -470,15 +454,15 @@ class Polygon : public Shape {
           break;
         }
       }
-      if (ok) return 1;
+      if (ok) return true;
     }
-    return 0;
+    return false;
   }
 
   bool isCongruentTo(const Polygon& p) const {
-    if (vert.size() != p.vert.size()) return 0;
+    if (vert.size() != p.vert.size()) return false;
     bool cong = help_to_congruent(p);
-    if (cong) return 1;
+    if (cong) return true;
     std::reverse(vert.begin(), vert.end());
     cong = help_to_congruent(p);
     return cong;
@@ -489,7 +473,7 @@ class Polygon : public Shape {
     if (pointer) {
       return isCongruentTo(*pointer);
     } else {
-      return 0;
+      return false;
     }
   }
 
@@ -514,15 +498,15 @@ class Polygon : public Shape {
           break;
         }
       }
-      if (ok) return 1;
+      if (ok) return true;
     }
-    return 0;
+    return false;
   }
 
   bool isSimilarTo(const Polygon& p) const {
-    if (vert.size() != p.vert.size()) return 0;
+    if (vert.size() != p.vert.size()) return false;
     bool sim = help_to_similar(p);
-    if (sim) return 1;
+    if (sim) return true;
     std::reverse(vert.begin(), vert.end());
     sim = help_to_similar(p);
     return sim;
@@ -533,17 +517,17 @@ class Polygon : public Shape {
     if (pointer) {
       return isSimilarTo(*pointer);
     } else {
-      return 0;
+      return false;
     }
   }
 
   bool containsPoint(const Point& pt) const final {
     if (point_between(vert[0], pt, vert.back())) {
-      return 1;
+      return true;
     }
     for (size_t i = 1; i < vert.size(); ++i) {
       if (point_between(vert[i - 1], pt, vert[i])) {
-        return 1;
+        return true;
       }
     }
     double param = angle_between(Vector(pt, vert.back()), Vector(pt, vert[0]));
