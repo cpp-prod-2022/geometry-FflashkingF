@@ -159,9 +159,8 @@ class Line {
     Point pt2 = pt - v;
     if (dist(pt1) < dist(pt2)) {
       return pt1;
-    } else {
-      return pt2;
     }
+    return pt2;
   }
 
   Point reflect(const Point& pt) const {
@@ -261,27 +260,24 @@ class Ellipse : public Shape {
     const Ellipse* pointer = dynamic_cast<const Ellipse*>(&sh);
     if (pointer) {
       return *this == *pointer;
-    } else {
-      return false;
     }
+    return false;
   }
 
   bool isCongruentTo(const Shape& sh) const final {
     const Ellipse* e = dynamic_cast<const Ellipse*>(&sh);
     if (e) {
       return a == e->a && equal(get_c(), e->get_c());
-    } else {
-      return false;
     }
+    return false;
   }
 
   bool isSimilarTo(const Shape& sh) const final {
     const Ellipse* e = dynamic_cast<const Ellipse*>(&sh);
     if (e) {
       return equal(a * e->get_c(), get_c() * e->a);
-    } else {
-      return false;
     }
+    return false;
   }
 
   bool containsPoint(const Point& pt) const final {
@@ -432,9 +428,8 @@ class Polygon : public Shape {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
     if (pointer) {
       return *this == *pointer;
-    } else {
-      return false;
     }
+    return false;
   }
 
   size_t before(size_t i) const { return i == 0 ? vert.size() - 1 : i - 1; }
@@ -472,9 +467,8 @@ class Polygon : public Shape {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
     if (pointer) {
       return isCongruentTo(*pointer);
-    } else {
-      return false;
     }
+    return false;
   }
 
   bool help_to_similar(const Polygon& p) const {
@@ -491,7 +485,6 @@ class Polygon : public Shape {
         v4 *= k;
         double a1 = std::fabs(angle_between(v1, v2));
         double a2 = std::fabs(angle_between(v3, v4));
-
         if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
             !equal(a1, a2)) {
           ok = 0;
@@ -516,9 +509,8 @@ class Polygon : public Shape {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
     if (pointer) {
       return isSimilarTo(*pointer);
-    } else {
-      return false;
     }
+    return false;
   }
 
   bool containsPoint(const Point& pt) const final {
@@ -553,7 +545,6 @@ class Polygon : public Shape {
     for (size_t i = 0; i < vert.size(); ++i) {
       Vector v(vert[i], center);
       vert[i] = center + Vector(vert[i], center);
-      ;
     }
   }
 
