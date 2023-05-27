@@ -1,3 +1,4 @@
+#pragma once
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -329,8 +330,8 @@ class Polygon : public Shape {
  public:
   Polygon(const std::vector<Point>& a) : vert(a) {}
   Polygon() {}
-  template <typename... Why>  //??????
-  Polygon(Why... args) {      // Point... why not this?
+  template <typename... Points> 
+  Polygon(Points... args) {      
     (vert.emplace_back(args), ...);
   }
   Polygon(const std::initializer_list<Point>& list) {
