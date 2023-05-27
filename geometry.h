@@ -50,8 +50,6 @@ bool operator==(const Point& pt1, const Point& pt2) {
   return equal(pt1.x, pt2.x) && equal(pt1.y, pt2.y);
 }
 
-bool operator!=(const Point& a, const Point& b) { return !(a == b); }
-
 namespace {
 struct Vector {
   double x = 0, y = 0;
@@ -140,8 +138,6 @@ class Line {
       return equal(l.a, a * k) && equal(l.c, c * k);
     }
   }
-
-  bool operator!=(const Line& l) const { return !(*this == l); }
 
   Vector norm_vect() const {
     double len = hypot(a, b);
@@ -253,8 +249,6 @@ class Ellipse : public Shape {
     return equal(a, e.a) &&
            ((f1 == e.f1 && f2 == e.f2) || (f1 == e.f2 && f2 == e.f1));
   }
-
-  bool operator!=(const Ellipse& e) { return !(*this == e); }
 
   bool is_equal(const Shape& sh) const final {
     const Ellipse* pointer = dynamic_cast<const Ellipse*>(&sh);
@@ -421,8 +415,6 @@ class Polygon : public Shape {
     eq = help_to_equal(p);
     return eq;
   }
-
-  bool operator!=(const Polygon& p) const { return !(*this == p); }
 
   bool is_equal(const Shape& sh) const final {
     const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
