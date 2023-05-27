@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 
+namespace {
 const double EPS1 = 1e-8;
 const double PI = acos(-1);
 
@@ -12,20 +13,15 @@ bool equal(double a, double b) { return std::fabs(a - b) < EPS1; }
 
 bool smaller_or_equal(double a, double b) { return a <= b || equal(a, b); }
 
-namespace {
-const uint8_t three = 3;
-const uint8_t pi_in_gradus = 180;
-};  // namespace
+const uint8_t THREE = 3;
+const uint8_t PI_IN_GRADUS = 180;
 
-bool sign(double a) {
-  return equal(a, 0) || a >= 0;
-}
+bool sign(double a) { return equal(a, 0) || a >= 0; }
 
-double to_radian(double angle) { return angle * PI / pi_in_gradus; }
+double to_radian(double angle) { return angle * PI / PI_IN_GRADUS; }
 
-namespace {
 struct Vector;
-}
+}  // namespace
 
 struct Point {
   double x = 0, y = 0;
@@ -34,11 +30,11 @@ struct Point {
   explicit Point(const Vector&);
 };
 
-std::ostream& operator<<(std::ostream& out, const Point& pt) {
-  out << pt.x << ' ' << pt.y << std::endl;
-  return out;
+bool operator==(const Point& pt1, const Point& pt2) {
+  return equal(pt1.x, pt2.x) && equal(pt1.y, pt2.y);
 }
 
+namespace {
 double dist(const Point& pt1, const Point& pt2) {
   return hypot(pt1.x - pt2.x, pt1.y - pt2.y);
 }
@@ -47,11 +43,6 @@ bool point_between(const Point& left, const Point& pt, const Point& right) {
   return equal(dist(left, right), dist(left, pt) + dist(pt, right));
 }
 
-bool operator==(const Point& pt1, const Point& pt2) {
-  return equal(pt1.x, pt2.x) && equal(pt1.y, pt2.y);
-}
-
-namespace {
 struct Vector {
   double x = 0, y = 0;
 
@@ -90,9 +81,6 @@ struct Vector {
     y /= len;
   }
 };
-}  // namespace
-
-Point::Point(const Vector& v) : x(v.x), y(v.y) {}
 
 Vector operator-(const Vector& v1, const Vector& v2) {
   return Vector(v1.x - v2.x, v1.y - v2.y);
@@ -117,10 +105,18 @@ double operator%(const Vector& v1, const Vector& v2) {
 double angle_between(const Vector& v1, const Vector& v2) {
   return atan2(v1 % v2, v1 * v2);
 }
+}  // namespace
+
+Point::Point(const Vector& v) : x(v.x), y(v.y) {}
 
 class Line {
  private:
   double a, b, c;
+
+  Vector norm_vect() const {
+    double len = hypot(a, b);
+    return Vector(a / len, b / len);
+  }
 
  public:
   Line(const Point& pt0, const Point& pt1)
@@ -140,11 +136,7 @@ class Line {
     }
   }
 
-  Vector norm_vect() const {
-    double len = hypot(a, b);
-    return Vector(a / len, b / len);
-  }
-
+ public:
   double dist(const Point& pt) const {
     return fabs(pt.x * a + pt.y * b + c) / hypot(a, b);
   }
@@ -169,14 +161,7 @@ class Line {
     double d = a * l2.b - l2.a * b;
     return Point((b * l2.c - l2.b * c) / d, (c * l2.a - a * l2.c) / d);
   }
-
-  friend std::ostream& operator<<(std::ostream&, const Line&);
 };
-
-std::ostream& operator<<(std::ostream& out, const Line& l) {
-  out << l.a << ' ' << l.b << ' ' << l.c << std::endl;
-  return out;
-}
 
 class Shape {
  public:
@@ -198,20 +183,16 @@ bool operator==(const Shape& sh1, const Shape& sh2) {
   return sh1.is_equal(sh2);
 }
 
-bool operator!=(const Shape& sh1, const Shape& sh2) {
-  return !sh1.is_equal(sh2);
-}
-
 class Ellipse : public Shape {
  protected:
   Point f1, f2;
   double a;
 
- public:
-  Ellipse(const Point& f1, const Point& f2, double _2a)
-      : f1(f1), f2(f2), a(_2a / 2) {}
-
-  std::pair<Point, Point> focuses() const { return std::make_pair(f1, f2); }
+ private:
+  bool is_equal(const Shape& sh) const final {
+    const Ellipse* pointer = dynamic_cast<const Ellipse*>(&sh);
+    return pointer && *this == *pointer;
+  }
 
   double get_c() const { return hypot(f2.x - f1.x, f2.y - f1.y) / 2; }
 
@@ -219,6 +200,12 @@ class Ellipse : public Shape {
     double c = get_c();
     return sqrt(a * a - c * c);
   }
+
+ public:
+  Ellipse(const Point& f1, const Point& f2, double _2a)
+      : f1(f1), f2(f2), a(_2a / 2) {}
+
+  std::pair<Point, Point> focuses() const { return std::make_pair(f1, f2); }
 
   double eccentricity() const { return get_c() / a; }
 
@@ -240,7 +227,7 @@ class Ellipse : public Shape {
 
   double perimeter() const override {
     double b = get_b();
-    return PI * (three * (a + b) - sqrt((three * a + b) * (a + three * b)));
+    return PI * (THREE * (a + b) - sqrt((THREE * a + b) * (a + THREE * b)));
     // return 4 * a * std::comp_ellint_2(eccentricity());
   }
 
@@ -249,11 +236,6 @@ class Ellipse : public Shape {
   bool operator==(const Ellipse& e) const {
     return equal(a, e.a) &&
            ((f1 == e.f1 && f2 == e.f2) || (f1 == e.f2 && f2 == e.f1));
-  }
-
-  bool is_equal(const Shape& sh) const final {
-    const Ellipse* pointer = dynamic_cast<const Ellipse*>(&sh);
-    return pointer && *this == *pointer;
   }
 
   bool isCongruentTo(const Shape& sh) const final {
@@ -327,11 +309,71 @@ class Polygon : public Shape {
  protected:
   mutable std::vector<Point> vert;
 
+ private:
+  bool help_to_equal(const Polygon& p) const {
+    size_t start = static_cast<size_t>(-1);
+    for (size_t i = 0; i < vert.size(); ++i) {
+      if (vert[i] == p.vert[0]) {
+        start = i;
+        break;
+      }
+    }
+    if (start != static_cast<size_t>(-1)) {
+      std::vector<Point> temp(vert.size());
+      copy(vert.begin() + static_cast<int>(start), vert.end(), temp.begin());
+      copy(vert.begin(), vert.begin() + static_cast<int>(start),
+           temp.begin() + static_cast<int>(vert.size() - start));
+      vert = temp;
+      for (size_t i = 1; i < vert.size(); ++i) {
+        if (vert[i] != p.vert[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  size_t before(size_t i) const { return i == 0 ? vert.size() - 1 : i - 1; }
+
+  size_t next(size_t i) const { return i == vert.size() - 1 ? 0 : i + 1; }
+
+  bool help_to_similar_and_congruent(const Polygon& p,
+                                     const bool is_help_to_congruent) const {
+    for (size_t start = 0; start < vert.size(); ++start) {
+      bool ok = 1;
+      double k = (is_help_to_congruent ? 1 : -1);
+      for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
+        Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
+        Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
+        if (k == -1) {
+          k = v1.len() / v3.len();
+        }
+        v3 *= k;
+        v4 *= k;
+        double a1 = std::fabs(angle_between(v1, v2));
+        double a2 = std::fabs(angle_between(v3, v4));
+        if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
+            !equal(a1, a2)) {
+          ok = 0;
+          break;
+        }
+      }
+      if (ok) return true;
+    }
+    return false;
+  }
+
+  bool is_equal(const Shape& sh) const final {
+    const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
+    return pointer && *this == *pointer;
+  }
+
  public:
   Polygon(const std::vector<Point>& a) : vert(a) {}
   Polygon() {}
-  template <typename... Points> 
-  Polygon(Points... args) {      
+  template <typename... Points>
+  Polygon(Points... args) {
     (vert.emplace_back(args), ...);
   }
   Polygon(const std::initializer_list<Point>& list) {
@@ -375,30 +417,6 @@ class Polygon : public Shape {
     return fabs(ans) / 2;
   }
 
-  bool help_to_equal(const Polygon& p) const {
-    size_t start = static_cast<size_t>(-1);
-    for (size_t i = 0; i < vert.size(); ++i) {
-      if (vert[i] == p.vert[0]) {
-        start = i;
-        break;
-      }
-    }
-    if (start != static_cast<size_t>(-1)) {
-      std::vector<Point> temp(vert.size());
-      copy(vert.begin() + static_cast<int>(start), vert.end(), temp.begin());
-      copy(vert.begin(), vert.begin() + static_cast<int>(start),
-           temp.begin() + static_cast<int>(vert.size() - start));
-      vert = temp;
-      for (size_t i = 1; i < vert.size(); ++i) {
-        if (vert[i] != p.vert[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
   bool operator==(const Polygon& p) const {
     if (vert.size() != p.vert.size()) return false;
     bool eq = help_to_equal(p);
@@ -406,40 +424,6 @@ class Polygon : public Shape {
     std::reverse(vert.begin(), vert.end());
     eq = help_to_equal(p);
     return eq;
-  }
-
-  bool is_equal(const Shape& sh) const final {
-    const Polygon* pointer = dynamic_cast<const Polygon*>(&sh);
-    return pointer && *this == *pointer;
-  }
-
-  size_t before(size_t i) const { return i == 0 ? vert.size() - 1 : i - 1; }
-
-  size_t next(size_t i) const { return i == vert.size() - 1 ? 0 : i + 1; }
-
-  bool help_to_similar_and_congruent(const Polygon& p, const bool is_help_to_congruent) const {
-    for (size_t start = 0; start < vert.size(); ++start) {
-      bool ok = 1;
-      double k = (is_help_to_congruent ? 1 : -1);
-      for (size_t i = start, j = 0; j < vert.size(); ++j, i = next(i)) {
-        Vector v1(vert[before(i)], vert[i]), v2(vert[i], vert[next(i)]);
-        Vector v3(p.vert[before(j)], p.vert[j]), v4(p.vert[j], p.vert[next(j)]);
-        if (k == -1) {
-          k = v1.len() / v3.len();
-        }
-        v3 *= k;
-        v4 *= k;
-        double a1 = std::fabs(angle_between(v1, v2));
-        double a2 = std::fabs(angle_between(v3, v4));
-        if (!equal(v1.len(), v3.len()) || !equal(v2.len(), v4.len()) ||
-            !equal(a1, a2)) {
-          ok = 0;
-          break;
-        }
-      }
-      if (ok) return true;
-    }
-    return false;
   }
 
   bool isCongruentTo(const Polygon& p) const {
@@ -519,15 +503,7 @@ class Polygon : public Shape {
     }
   }
 
-  friend std::ostream& operator<<(std::ostream&, const Polygon&);
 };
-
-std::ostream& operator<<(std::ostream& out, const Polygon& p) {
-  for (size_t i = 0; i < p.vert.size(); ++i) {
-    out << p.vert[i].x << ' ' << p.vert[i].y << std::endl;
-  }
-  return out;
-}
 
 class Rectangle : public Polygon {
  public:
@@ -549,7 +525,7 @@ class Rectangle : public Polygon {
   }
 
   std::pair<Line, Line> diagonals() const {
-    return {Line(vert[0], vert[2]), Line(vert[1], vert[three])};
+    return {Line(vert[0], vert[2]), Line(vert[1], vert[THREE])};
   }
 };
 
@@ -571,8 +547,8 @@ class Triangle : public Polygon {
   Triangle(const Point& a, const Point& b, const Point& c) : Polygon(a, b, c) {}
 
   Point centroid() const {
-    return Point((vert[0].x + vert[1].x + vert[2].x) / three,
-                 (vert[0].y + vert[1].y + vert[2].y) / three);
+    return Point((vert[0].x + vert[1].x + vert[2].x) / THREE,
+                 (vert[0].y + vert[1].y + vert[2].y) / THREE);
   }
 
   Point orthocenter() const {
@@ -636,9 +612,3 @@ class Triangle : public Polygon {
   }
 };
 
-std::ostream& operator<<(std::ostream& out, const Circle& c) {
-  out << "start" << std::endl;
-  out << c.focuses().first << c.radius() << std::endl;
-  out << "endl" << std::endl;
-  return out;
-}
